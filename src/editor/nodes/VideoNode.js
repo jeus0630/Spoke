@@ -13,18 +13,31 @@ export default class VideoNode extends AudioParamsNode(Video) {
   static nodeName = "Video";
 
   static initialElementProps = {
-    src: new URL(spokeLandingVideo, location).href
+    src: new URL(spokeLandingVideo, location).href,
+    changeableSrc: "https://hubs-1-assets.hubs.belivvr.com/assets/public/minjumaru.json"
   };
+
+  static async getSrcFromJSON(changeableSrc) {
+    const data = await fetch(changeableSrc).then(response => response.json());
+    return data.src;
+  }
 
   static async deserialize(editor, json, loadAsync, onError) {
     const node = await super.deserialize(editor, json);
 
     const videoComp = json.components.find(c => c.name === "video");
-    const { src, controls, autoPlay, loop, projection } = videoComp.props;
+    const { changeable, src, changeableSrc, controls, autoPlay, loop, projection } = videoComp.props;
 
     loadAsync(
       (async () => {
-        await node.load(src, onError);
+        if (changeable) {
+          await node.load(await VideoNode.getSrcFromJSON(changeableSrc), onError);
+        } else {
+          await node.load(src, onError);
+        }
+
+        node.changeable = changeable;
+        node.changeableSrc = changeableSrc;
         node.controls = controls || false;
         node.autoPlay = autoPlay;
         node.loop = loop;
@@ -44,7 +57,14 @@ export default class VideoNode extends AudioParamsNode(Video) {
 
     loadAsync(
       (async () => {
-        await node.load(src, onError);
+        if (changeable) {
+          await node.load(await VideoNode.getSrcFromJSON(changeableSrc), onError);
+        } else {
+          await node.load(src, onError);
+        }
+
+        node.changeable = changeable;
+        node.changeableSrc = changeableSrc;
         node.controls = controls || false;
         node.autoPlay = autoPlay;
         node.loop = loop;
@@ -58,6 +78,8 @@ export default class VideoNode extends AudioParamsNode(Video) {
   constructor(editor) {
     super(editor, editor.audioListener, AudioElementType.VIDEO);
 
+    this._changeable = false;
+    this._changeableSrc = "";
     this._canonicalUrl = "";
     this._autoPlay = true;
     this.controls = true;
@@ -67,6 +89,14 @@ export default class VideoNode extends AudioParamsNode(Video) {
 
   get src() {
     return this._canonicalUrl;
+  }
+
+  get changeableSrc() {
+    return this._changeableSrc;
+  }
+
+  get changeable() {
+    return this._changeable;
   }
 
   get autoPlay() {
@@ -79,6 +109,22 @@ export default class VideoNode extends AudioParamsNode(Video) {
 
   set src(value) {
     this.load(value).catch(console.error);
+  }
+
+  set changeableSrc(value) {
+    this._changeableSrc = value;
+
+    if (this.changeable) {
+      VideoNode.getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
+    }
+  }
+
+  set changeable(value) {
+    this._changeable = value;
+
+    if (this.changeable) {
+      VideoNode.getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
+    }
   }
 
   async load(src, onError) {
@@ -176,6 +222,8 @@ export default class VideoNode extends AudioParamsNode(Video) {
     this.controls = source.controls;
     this.billboard = source.billboard;
     this._canonicalUrl = source._canonicalUrl;
+    this._changeable = source._changeable;
+    this._changeableSrc = source._changeableSrc;
     this.href = source.href;
 
     return this;
@@ -185,6 +233,8 @@ export default class VideoNode extends AudioParamsNode(Video) {
     const components = {
       video: {
         src: this._canonicalUrl,
+        changeable: this.changeable,
+        changeableSrc: this.changeableSrc,
         controls: this.controls,
         autoPlay: this.autoPlay,
         loop: this.loop,
@@ -208,6 +258,8 @@ export default class VideoNode extends AudioParamsNode(Video) {
 
     this.addGLTFComponent("video", {
       src: this._canonicalUrl,
+      changeable: this.changeable,
+      changeableSrc: this.changeableSrc,
       controls: this.controls,
       autoPlay: this.autoPlay,
       loop: this.loop,
