@@ -17,15 +17,27 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     audioHelperTexture = await loadTexture(audioIconUrl);
   }
 
+  static async getSrcFromJSON(changeableSrc) {
+    const data = await fetch(changeableSrc).then(response => response.json());
+    return data.src;
+  }
+
   static async deserialize(editor, json, loadAsync, onError) {
     const node = await super.deserialize(editor, json);
 
     const audioComp = json.components.find(c => c.name === "audio");
-    const { src, controls, autoPlay, loop } = audioComp.props;
+    const { changeable, changeableSrc, src, controls, autoPlay, loop } = audioComp.props;
 
     loadAsync(
       (async () => {
-        await node.load(src, onError);
+        if (changeable) {
+          await node.load(await AudioNode.getSrcFromJSON(changeableSrc), onError);
+        } else {
+          await node.load(src, onError);
+        }
+
+        node.changeable = changeable;
+        node.changeableSrc = changeableSrc;
         node.controls = controls || false;
         node.autoPlay = autoPlay;
         node.loop = loop;
@@ -38,6 +50,8 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
   constructor(editor) {
     super(editor, editor.audioListener, AudioElementType.AUDIO);
 
+    this._changeable = false;
+    this._changeableSrc = "";
     this._canonicalUrl = "";
     this._autoPlay = true;
     this.controls = true;
@@ -56,8 +70,32 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     return this._canonicalUrl;
   }
 
+  get changeableSrc() {
+    return this._changeableSrc;
+  }
+
+  get changeable() {
+    return this._changeable;
+  }
+
   set src(value) {
     this.load(value).catch(console.error);
+  }
+
+  set changeableSrc(value) {
+    this._changeableSrc = value;
+
+    if (this.changeable) {
+      AudioNode.getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
+    }
+  }
+
+  set changeable(value) {
+    this._changeable = value;
+
+    if (this.changeable) {
+      AudioNode.getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
+    }
   }
 
   get autoPlay() {
@@ -145,6 +183,8 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     }
 
     this._canonicalUrl = source._canonicalUrl;
+    this._canonicalUrl = source._canonicalUrl;
+    this._changeable = source._changeable;
     this.controls = source.controls;
 
     return this;
@@ -154,6 +194,8 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     return super.serialize({
       audio: {
         src: this._canonicalUrl,
+        changeable: this.changeable,
+        changeableSrc: this.changeableSrc,
         controls: this.controls,
         autoPlay: this.autoPlay,
         loop: this.loop
@@ -166,6 +208,8 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     this.remove(this.helper);
     this.addGLTFComponent("audio", {
       src: this._canonicalUrl,
+      changeable: this.changeable,
+      changeableSrc: this.changeableSrc,
       controls: this.controls,
       autoPlay: this.autoPlay,
       loop: this.loop

@@ -11,6 +11,8 @@ import { SourceType } from "../../editor/objects/AudioParams";
 
 export default function AudioNodeEditor(props) {
   const { editor, node } = props;
+  const onChangeChangeable = useSetPropertySelected(editor, "changeable");
+  const onChangeChangeableSrc = useSetPropertySelected(editor, "changeableSrc");
   const onChangeSrc = useSetPropertySelected(editor, "src");
   const onChangeControls = useSetPropertySelected(editor, "controls");
   const onChangeAutoPlay = useSetPropertySelected(editor, "autoPlay");
@@ -18,9 +20,18 @@ export default function AudioNodeEditor(props) {
 
   return (
     <NodeEditor description={AudioNodeEditor.description} {...props}>
-      <InputGroup name="Audio Url">
-        <AudioInput value={node.src} onChange={onChangeSrc} />
+      <InputGroup name="Changeable" info="Dynamically change image src">
+        <BooleanInput value={node.changeable} onChange={onChangeChangeable} />
       </InputGroup>
+      {node.changeable ? (
+        <InputGroup name="Src">
+          <AudioInput value={node.changeableSrc} onChange={onChangeChangeableSrc} />
+        </InputGroup>
+      ) : (
+        <InputGroup name="Audio Url">
+          <AudioInput value={node.src} onChange={onChangeSrc} />
+        </InputGroup>
+      )}
       <InputGroup name="Controls" info="Toggle the visibility of the media controls in Hubs.">
         <BooleanInput value={node.controls} onChange={onChangeControls} />
       </InputGroup>
