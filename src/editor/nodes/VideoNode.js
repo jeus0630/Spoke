@@ -6,6 +6,7 @@ import spokeLandingVideo from "../../assets/video/SpokePromo.mp4";
 import { RethrownError } from "../utils/errors";
 import { getObjectPerfIssues } from "../utils/performance";
 import { AudioElementType } from "../objects/AudioParams";
+import getSrcFromJSON from "../../vendor/belivvr/getSrcFromJSON";
 
 export default class VideoNode extends AudioParamsNode(Video) {
   static componentName = "video";
@@ -31,7 +32,7 @@ export default class VideoNode extends AudioParamsNode(Video) {
     loadAsync(
       (async () => {
         if (changeable) {
-          await node.load(await VideoNode.getSrcFromJSON(changeableSrc), onError);
+          await node.load(await getSrcFromJSON(changeableSrc), onError);
         } else {
           await node.load(src, onError);
         }
@@ -58,7 +59,7 @@ export default class VideoNode extends AudioParamsNode(Video) {
     loadAsync(
       (async () => {
         if (changeable) {
-          await node.load(await VideoNode.getSrcFromJSON(changeableSrc), onError);
+          await node.load(await getSrcFromJSON(changeableSrc), onError);
         } else {
           await node.load(src, onError);
         }
@@ -115,7 +116,7 @@ export default class VideoNode extends AudioParamsNode(Video) {
     this._changeableSrc = value;
 
     if (this.changeable) {
-      VideoNode.getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
+      getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
     }
   }
 
@@ -123,7 +124,7 @@ export default class VideoNode extends AudioParamsNode(Video) {
     this._changeable = value;
 
     if (this.changeable) {
-      VideoNode.getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
+      getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
     }
   }
 

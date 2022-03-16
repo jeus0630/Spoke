@@ -5,6 +5,7 @@ import AudioSource from "../objects/AudioSource";
 import loadTexture from "../utils/loadTexture";
 import { RethrownError } from "../utils/errors";
 import { AudioElementType } from "../objects/AudioParams";
+import getSrcFromJSON from "../../vendor/belivvr/getSrcFromJSON";
 
 let audioHelperTexture = null;
 
@@ -17,11 +18,6 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     audioHelperTexture = await loadTexture(audioIconUrl);
   }
 
-  static async getSrcFromJSON(changeableSrc) {
-    const data = await fetch(changeableSrc).then(response => response.json());
-    return data.src;
-  }
-
   static async deserialize(editor, json, loadAsync, onError) {
     const node = await super.deserialize(editor, json);
 
@@ -31,7 +27,7 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     loadAsync(
       (async () => {
         if (changeable) {
-          await node.load(await AudioNode.getSrcFromJSON(changeableSrc), onError);
+          await node.load(await getSrcFromJSON(changeableSrc), onError);
         } else {
           await node.load(src, onError);
         }
@@ -86,7 +82,7 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     this._changeableSrc = value;
 
     if (this.changeable) {
-      AudioNode.getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
+      getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
     }
   }
 
@@ -94,7 +90,7 @@ export default class AudioNode extends AudioParamsNode(AudioSource) {
     this._changeable = value;
 
     if (this.changeable) {
-      AudioNode.getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
+      getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
     }
   }
 

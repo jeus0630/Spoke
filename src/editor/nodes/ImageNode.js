@@ -3,6 +3,7 @@ import Image, { ImageAlphaMode } from "../objects/Image";
 import spokeLogoSrc from "../../assets/spoke-icon.png";
 import { RethrownError } from "../utils/errors";
 import { getObjectPerfIssues, maybeAddLargeFileIssue } from "../utils/performance";
+import getSrcFromJSON from "../../vendor/belivvr/getSrcFromJSON";
 
 export default class ImageNode extends EditorNodeMixin(Image) {
   static componentName = "image";
@@ -13,11 +14,6 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     src: new URL(spokeLogoSrc, location).href,
     changeableSrc: "https://hubs-1-assets.hubs.belivvr.com/assets/public/test1.json"
   };
-
-  static async getSrcFromJSON(changeableSrc) {
-    const data = await fetch(changeableSrc).then(response => response.json());
-    return data.src;
-  }
 
   static async deserialize(editor, json, loadAsync, onError) {
     const node = await super.deserialize(editor, json);
@@ -33,7 +29,7 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     loadAsync(
       (async () => {
         if (changeable) {
-          await node.load(await ImageNode.getSrcFromJSON(changeableSrc), onError);
+          await node.load(await getSrcFromJSON(changeableSrc), onError);
         } else {
           await node.load(src, onError);
         }
@@ -87,7 +83,7 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     this._changeableSrc = value;
 
     if (this.changeable) {
-      ImageNode.getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
+      getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
     }
   }
 
@@ -95,7 +91,7 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     this._changeable = value;
 
     if (this.changeable) {
-      ImageNode.getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
+      getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
     }
   }
 
