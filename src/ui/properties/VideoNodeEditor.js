@@ -17,6 +17,8 @@ const videoProjectionOptions = Object.values(VideoProjection).map(v => ({ label:
 
 export default function VideoNodeEditor(props) {
   const { editor, node } = props;
+  const onChangeChangeable = useSetPropertySelected(editor, "changeable");
+  const onChangeChangeableSrc = useSetPropertySelected(editor, "changeableSrc");
   const onChangeSrc = useSetPropertySelected(editor, "src");
   const onChangeProjection = useSetPropertySelected(editor, "projection");
   const onChangeBillboard = useSetPropertySelected(editor, "billboard");
@@ -27,9 +29,18 @@ export default function VideoNodeEditor(props) {
 
   return (
     <NodeEditor description={VideoNodeEditor.description} {...props}>
-      <InputGroup name="Video">
-        <VideoInput value={node.src} onChange={onChangeSrc} />
+      <InputGroup name="Changeable" info="Dynamically change video src">
+        <BooleanInput value={node.changeable} onChange={onChangeChangeable} />
       </InputGroup>
+      {node.changeable ? (
+        <InputGroup name="Src">
+          <VideoInput value={node.changeableSrc} onChange={onChangeChangeableSrc} />
+        </InputGroup>
+      ) : (
+        <InputGroup name="Video">
+          <VideoInput value={node.src} onChange={onChangeSrc} />
+        </InputGroup>
+      )}
       <InputGroup name="Billboard" info="Video always faces user in Hubs. Does not billboard in Spoke.">
         <BooleanInput value={node.billboard} onChange={onChangeBillboard} />
       </InputGroup>

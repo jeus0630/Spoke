@@ -3,6 +3,7 @@ import Image, { ImageAlphaMode } from "../objects/Image";
 import spokeLogoSrc from "../../assets/spoke-icon.png";
 import { RethrownError } from "../utils/errors";
 import { getObjectPerfIssues, maybeAddLargeFileIssue } from "../utils/performance";
+import getSrcFromJSON from "../../vendor/belivvr/getSrcFromJSON";
 
 export default class ImageNode extends EditorNodeMixin(Image) {
   static componentName = "image";
@@ -10,13 +11,16 @@ export default class ImageNode extends EditorNodeMixin(Image) {
   static nodeName = "Image";
 
   static initialElementProps = {
-    src: new URL(spokeLogoSrc, location).href
+    src: new URL(spokeLogoSrc, location).href,
+    changeableSrc: "https://hubs-1-assets.hubs.belivvr.com/assets/public/test1.json"
   };
 
   static async deserialize(editor, json, loadAsync, onError) {
     const node = await super.deserialize(editor, json);
 
-    const { src, projection, controls, alphaMode, alphaCutoff } = json.components.find(c => c.name === "image").props;
+    const { changeable, changeableSrc, src, projection, controls, alphaMode, alphaCutoff } = json.components.find(
+      c => c.name === "image"
+    ).props;
 
     if (json.components.find(c => c.name === "billboard")) {
       node.billboard = true;
@@ -24,7 +28,14 @@ export default class ImageNode extends EditorNodeMixin(Image) {
 
     loadAsync(
       (async () => {
-        await node.load(src, onError);
+        if (changeable) {
+          await node.load(await getSrcFromJSON(changeableSrc), onError);
+        } else {
+          await node.load(src, onError);
+        }
+
+        node.changeable = changeable;
+        node.changeableSrc = changeableSrc;
         node.controls = controls || false;
         node.alphaMode = alphaMode === undefined ? ImageAlphaMode.Blend : alphaMode;
         node.alphaCutoff = alphaCutoff === undefined ? 0.5 : alphaCutoff;
@@ -44,6 +55,8 @@ export default class ImageNode extends EditorNodeMixin(Image) {
   constructor(editor) {
     super(editor);
 
+    this._changeable = false;
+    this._changeableSrc = "";
     this._canonicalUrl = "";
     this.href = "";
     this.controls = true;
@@ -54,8 +67,32 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     return this._canonicalUrl;
   }
 
+  get changeableSrc() {
+    return this._changeableSrc;
+  }
+
+  get changeable() {
+    return this._changeable;
+  }
+
   set src(value) {
     this.load(value).catch(console.error);
+  }
+
+  set changeableSrc(value) {
+    this._changeableSrc = value;
+
+    if (this.changeable) {
+      getSrcFromJSON(value).then(src => this.load(src).catch(console.error));
+    }
+  }
+
+  set changeable(value) {
+    this._changeable = value;
+
+    if (this.changeable) {
+      getSrcFromJSON(this.changeableSrc).then(src => this.load(src).catch(console.error));
+    }
   }
 
   onChange() {
@@ -126,6 +163,8 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     this.alphaMode = source.alphaMode;
     this.alphaCutoff = source.alphaCutoff;
     this._canonicalUrl = source._canonicalUrl;
+    this._changeable = source._changeable;
+    this._changeableSrc = source._changeableSrc;
     this.href = source.href;
 
     return this;
@@ -135,6 +174,8 @@ export default class ImageNode extends EditorNodeMixin(Image) {
     const components = {
       image: {
         src: this._canonicalUrl,
+        changeable: this.changeable,
+        changeableSrc: this.changeableSrc,
         controls: this.controls,
         alphaMode: this.alphaMode,
         alphaCutoff: this.alphaCutoff,
@@ -158,6 +199,8 @@ export default class ImageNode extends EditorNodeMixin(Image) {
 
     const imageData = {
       src: this._canonicalUrl,
+      changeable: this.changeable,
+      changeableSrc: this.changeableSrc,
       controls: this.controls,
       alphaMode: this.alphaMode,
       projection: this.projection

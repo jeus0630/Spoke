@@ -18,6 +18,8 @@ const imageTransparencyOptions = Object.values(ImageAlphaMode).map(mapValue);
 
 export default function ImageNodeEditor(props) {
   const { editor, node } = props;
+  const onChangeChangeable = useSetPropertySelected(editor, "changeable");
+  const onChangeChangeableSrc = useSetPropertySelected(editor, "changeableSrc");
   const onChangeSrc = useSetPropertySelected(editor, "src");
   const onChangeControls = useSetPropertySelected(editor, "controls");
   const onChangeBillboard = useSetPropertySelected(editor, "billboard");
@@ -28,9 +30,18 @@ export default function ImageNodeEditor(props) {
 
   return (
     <NodeEditor description={ImageNodeEditor.description} {...props}>
-      <InputGroup name="Image Url">
-        <ImageInput value={node.src} onChange={onChangeSrc} />
+      <InputGroup name="Changeable" info="Dynamically change image src">
+        <BooleanInput value={node.changeable} onChange={onChangeChangeable} />
       </InputGroup>
+      {node.changeable ? (
+        <InputGroup name="Src">
+          <ImageInput value={node.changeableSrc} onChange={onChangeChangeableSrc} />
+        </InputGroup>
+      ) : (
+        <InputGroup name="Image Url">
+          <ImageInput value={node.src} onChange={onChangeSrc} />
+        </InputGroup>
+      )}
       <InputGroup
         name="Controls"
         info="Toggle the visibility of the media controls in Hubs. Does not billboard in Spoke."
