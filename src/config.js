@@ -52,6 +52,8 @@ import AudioZoneNode from "./editor/nodes/AudioZoneNode";
 import AudioZoneNodeEditor from "./ui/properties/AudioZoneNodeEditor";
 import MirrorNode from "./editor/nodes/MirrorNode";
 import MirrorNodeEditor from "./ui/properties/MirrorNodeEditor";
+import SharedScreenNode from "./editor/nodes/SharedScreenNode";
+import SharedScreenNodeEditor from "./ui/properties/SharedScreenNodeEditor";
 
 import MediaFrameNode from "./editor/nodes/MediaFrameNode";
 import MediaFrameNodeEditor from "./ui/properties/MediaFrameNodeEditor";
@@ -100,7 +102,7 @@ export function createEditor(api, settings) {
   editor.registerNode(AudioZoneNode, AudioZoneNodeEditor);
   editor.registerNode(TroikaTextNode, TroikaTextNodeEditor);
   editor.registerNode(MirrorNode, MirrorNodeEditor);
-
+  editor.registerNode(SharedScreenNode, SharedScreenNodeEditor);
 
   editor.registerSource(new ElementsSource(editor));
   editor.registerSource(new MyAssetsSource(editor));
