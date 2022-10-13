@@ -6,8 +6,8 @@ if (process.env.NODE_ENV === "production") {
 } else if (process.env.NODE_ENV === "test") {
   dotenv.config({ path: ".env.test" });
 } else {
-  dotenv.config({ path: ".env" });
   dotenv.config({ path: ".env.defaults" });
+  dotenv.config({ path: ".env" });
 }
 
 const cors = require("cors");

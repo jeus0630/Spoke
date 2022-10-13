@@ -13,6 +13,8 @@ import PublishedSceneDialog from "./PublishedSceneDialog";
 import { matchesFileTypes, AudioFileTypes } from "../ui/assets/fileTypes";
 import { RethrownError } from "../editor/utils/errors";
 
+import { blobToBase64 } from "../belivvr/utils";
+
 // Media related functions should be kept up to date with Hubs media-utils:
 // https://github.com/mozilla/hubs/blob/master/src/utils/media-utils.js
 
@@ -62,7 +64,7 @@ export const proxiedUrlFor = url => {
     return url;
   }
 
-  return `https://${configs.CORS_PROXY_SERVER}/${url}`;
+  return `${configs.CORS_PROXY_SERVER}/${url}`;
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
@@ -148,27 +150,11 @@ export default class Project extends EventEmitter {
   }
 
   isAuthenticated() {
-    const value = localStorage.getItem(LOCAL_STORE_KEY);
-
-    const store = JSON.parse(value);
-
-    return !!(store && store.credentials && store.credentials.token);
+    return true;
   }
 
   getToken() {
-    const value = localStorage.getItem(LOCAL_STORE_KEY);
-
-    if (!value) {
-      throw new Error("Not authenticated");
-    }
-
-    const store = JSON.parse(value);
-
-    if (!store || !store.credentials || !store.credentials.token) {
-      throw new Error("Not authenticated");
-    }
-
-    return store.credentials.token;
+    return "token";
   }
 
   getAccountId() {
@@ -349,7 +335,7 @@ export default class Project extends EventEmitter {
 
   unproxyUrl(baseUrl, url) {
     if (configs.CORS_PROXY_SERVER) {
-      const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
+      const corsProxyPrefix = configs.CORS_PROXY_SERVER;
 
       if (baseUrl.startsWith(corsProxyPrefix)) {
         baseUrl = baseUrl.substring(corsProxyPrefix.length);
@@ -1019,59 +1005,14 @@ export default class Project extends EventEmitter {
     return resp.json();
   }
 
-  async upload(blob, onUploadProgress, signal) {
-    // Use direct upload API, see: https://github.com/mozilla/reticulum/pull/319
-    const { phx_host: uploadHost } = await (await this.fetch(`${RETICULUM_SERVER}/api/v1/meta`)).json();
-    const uploadPort = new URL(RETICULUM_SERVER).port;
+  async upload(blob) {
+    const formData = new FormData();
+    formData.set("media", await blobToBase64(blob));
 
-    return await new Promise((resolve, reject) => {
-      const request = new XMLHttpRequest();
-
-      const onAbort = () => {
-        request.abort();
-        const error = new Error("Upload aborted");
-        error.name = "AbortError";
-        error.aborted = true;
-        reject(error);
-      };
-
-      if (signal) {
-        signal.addEventListener("abort", onAbort);
-      }
-
-      request.open("post", `https://${uploadHost}:${uploadPort}/api/v1/media`, true);
-
-      request.upload.addEventListener("progress", e => {
-        if (onUploadProgress) {
-          onUploadProgress(e.loaded / e.total);
-        }
-      });
-
-      request.addEventListener("error", error => {
-        if (signal) {
-          signal.removeEventListener("abort", onAbort);
-        }
-        reject(new RethrownError("Upload failed", error));
-      });
-
-      request.addEventListener("load", () => {
-        if (signal) {
-          signal.removeEventListener("abort", onAbort);
-        }
-
-        if (request.status < 300) {
-          const response = JSON.parse(request.responseText);
-          resolve(response);
-        } else {
-          reject(new Error(`Upload failed ${request.statusText}`));
-        }
-      });
-
-      const formData = new FormData();
-      formData.set("media", blob);
-
-      request.send(formData);
-    });
+    return fetch(`${RETICULUM_SERVER}/api/v1/media`, {
+      method: "POST",
+      body: formData
+    }).then(response => response.json());
   }
 
   uploadAssets(editor, files, onProgress, signal) {
