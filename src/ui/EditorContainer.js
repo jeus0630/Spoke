@@ -43,6 +43,8 @@ import tutorialTemplateUrl from "./../assets/templates/tutorial.spoke";
 
 import { TERMS, PRIVACY } from "../constants";
 
+import { getProjectId } from "../belivvr/utils";
+
 const StyledEditorContainer = styled.div`
   display: flex;
   flex: 1;
@@ -100,8 +102,7 @@ class EditorContainer extends Component {
   }
 
   componentDidMount() {
-    const { match, location } = this.props;
-    const projectId = match.params.projectId;
+    const projectId = getProjectId();
     const queryParams = new URLSearchParams(location.search);
 
     if (projectId === "new") {
@@ -127,7 +128,7 @@ class EditorContainer extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.match.url !== prevProps.match.url && !this.state.creatingProject) {
       const prevProjectId = prevProps.match.params.projectId;
-      const { projectId } = this.props.match.params;
+      const projectId = getProjectId();
       const queryParams = new URLSearchParams(location.search);
       let templateUrl = null;
 
