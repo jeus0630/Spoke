@@ -10,8 +10,6 @@ if (process.env.NODE_ENV === "production") {
   dotenv.config({ path: ".env.defaults" });
 }
 
-const fs = require("fs");
-const selfsigned = require("selfsigned");
 const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
@@ -20,55 +18,7 @@ const TerserJSPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
-function createHTTPSConfig() {
-  // Generate certs for the local webpack-dev-server.
-  if (fs.existsSync(path.join(__dirname, "certs"))) {
-    const key = fs.readFileSync(path.join(__dirname, "certs", "key.pem"));
-    const cert = fs.readFileSync(path.join(__dirname, "certs", "cert.pem"));
-
-    return { key, cert };
-  } else {
-    const pems = selfsigned.generate(
-      [
-        {
-          name: "commonName",
-          value: "localhost"
-        }
-      ],
-      {
-        days: 365,
-        keySize: 2048,
-        algorithm: "sha256",
-        extensions: [
-          {
-            name: "subjectAltName",
-            altNames: [
-              {
-                type: 2,
-                value: "localhost"
-              },
-              {
-                type: 2,
-                value: "hubs.local"
-              }
-            ]
-          }
-        ]
-      }
-    );
-
-    fs.mkdirSync(path.join(__dirname, "certs"));
-    fs.writeFileSync(path.join(__dirname, "certs", "cert.pem"), pems.cert);
-    fs.writeFileSync(path.join(__dirname, "certs", "key.pem"), pems.private);
-
-    return {
-      key: pems.private,
-      cert: pems.cert
-    };
-  }
-}
-
-const defaultHostName = "hubs.local";
+const defaultHostName = "localhost";
 const host = process.env.HOST_IP || defaultHostName;
 const port = process.env.HOST_PORT || 9090;
 const internalHostname = process.env.INTERNAL_HOSTNAME || defaultHostName;
@@ -82,7 +32,6 @@ module.exports = env => {
     devtool: process.env.NODE_ENV === "production" ? "source-map" : "inline-source-map",
 
     devServer: {
-      https: createHTTPSConfig(),
       historyApiFallback: true,
       port,
       host: process.env.HOST_IP || "0.0.0.0",
