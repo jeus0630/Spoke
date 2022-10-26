@@ -1,9 +1,17 @@
-export const getProjectId = () => location.pathname.split("/").pop();
-
 /**
  * @returns { string }
  */
-export const accessToken = () => JSON.parse(localStorage.getItem("recoil-persist")).accessToken;
+export function getProjectId() {
+  return window.XRCLOUD?.projectId || location.pathname.split("/").pop();
+}
+
+/**
+ * @returns { string }
+ * @throws { TypeError }
+ */
+export function getAccessToken() {
+  return JSON.parse(localStorage.getItem("recoil-persist")).accessToken;
+}
 
 /**
  * @param { Blob } blob
@@ -18,4 +26,12 @@ export function blobToBase64(blob) {
     };
     reader.readAsDataURL(blob);
   });
+}
+
+/**
+ * @returns { string }
+ * @throws { TypeError }
+ */
+export function getAccessKey() {
+  return JSON.parse(localStorage.getItem("recoil-persist")).accessKey;
 }
