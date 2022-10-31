@@ -183,7 +183,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/projects`, { headers });
@@ -202,7 +203,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/projects/${projectId}`, {
@@ -219,7 +221,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/scenes/projectless`, { headers });
@@ -359,7 +362,8 @@ export default class Project extends EventEmitter {
     const url = new URL(`${RETICULUM_SERVER}/api/v1/media/search`);
 
     const headers = {
-      "content-type": "application/json"
+      "content-type": "application/json",
+      "access-key": getAccessKey()
     };
 
     const searchParams = url.searchParams;
@@ -466,7 +470,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const project = {
@@ -529,7 +534,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const projectEndpoint = `${RETICULUM_SERVER}/api/v1/projects/${projectId}`;
@@ -593,7 +599,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const project = {
@@ -650,7 +657,8 @@ export default class Project extends EventEmitter {
 
   async getScene(sceneId) {
     const headers = {
-      "content-type": "application/json"
+      "content-type": "application/json",
+      "access-key": getAccessKey()
     };
 
     const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/scenes/${sceneId}`, {
@@ -984,7 +992,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${this.getToken()}`
+      authorization: `Bearer ${this.getToken()}`,
+      "access-key": getAccessKey()
     };
 
     const sceneParams = {
@@ -1095,7 +1104,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const body = JSON.stringify({
@@ -1133,7 +1143,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const assetEndpoint = `${RETICULUM_SERVER}/api/v1/assets/${assetId}`;
@@ -1156,7 +1167,8 @@ export default class Project extends EventEmitter {
 
     const headers = {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`,
+      "access-key": getAccessKey()
     };
 
     const projectAssetEndpoint = `${RETICULUM_SERVER}/api/v1/projects/${projectId}/assets/${assetId}`;
