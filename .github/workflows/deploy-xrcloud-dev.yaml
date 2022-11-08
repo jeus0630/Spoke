@@ -1,0 +1,54 @@
+name: Deploy S3 XRCloud Dev
+
+on:
+  push:
+    branches:
+      - xrcloud-dev
+
+jobs:
+  deploy-s3-alpha:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: yarn
+
+      - name: Install
+        run: yarn --prefer-offline
+
+      - name: Build
+        run: yarn build
+        env:
+          HUBS_SERVER: ${{ secrets.HUBS_SERVER_XRCLOUD_DEV }}
+          RETICULUM_SERVER: ${{ secrets.RETICULUM_SERVER_XRCLOUD_DEV }}
+          FARSPARK_SERVER: ${{ secrets.FARSPARK_SERVER_XRCLOUD_DEV }}
+          THUMBNAIL_SERVER: ${{ secrets.THUMBNAIL_SERVER_XRCLOUD_DEV }}
+          CORS_PROXY_SERVER: ${{ secrets.CORS_PROXY_SERVER_XRCLOUD_DEV }}
+          NON_CORS_PROXY_DOMAINS: ${{ secrets.NON_CORS_PROXY_DOMAINS_XRCLOUD_DEV }}
+          BASE_ASSETS_PATH: ${{ secrets.BASE_ASSETS_PATH_XRCLOUD_DEV }}
+          ROUTER_BASE_PATH: /spoke
+          GITHUB_REPO: spoke
+          IS_MOZ: false
+
+      - name: Deploy S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_XRCLOUD_DEV_BUCKET_XRCLOUD_DEV }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'ap-northeast-2'
+          SOURCE_DIR: 'dist'
+
+      - name: invalidate
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ secrets.AWS_DISTRIBUTION_XRCLOUD_DEV }}
+          PATHS: '/spoke/*'
+          AWS_REGION: 'ap-northeast-2'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
