@@ -22,6 +22,16 @@ const resolveUrlCache = new Map();
 const resolveMediaCache = new Map();
 
 const RETICULUM_SERVER = configs.RETICULUM_SERVER || document.location.hostname;
+const HEADERS = ({ json } = { json: true }) => {
+  const headers = {
+    "access-key": getAccessKey(),
+    authorization: `Bearer ${getAccessToken()}`
+  };
+
+  if (json) headers["content-type"] = "application/json";
+
+  return headers;
+};
 
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
@@ -72,7 +82,7 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
     return url;
   }
 
-  return `https://${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
+  return `${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
 };
 
 const CommonKnownContentTypes = {
@@ -179,15 +189,7 @@ export default class Project extends EventEmitter {
   }
 
   async getProjects() {
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
-    const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/projects`, { headers });
+    const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/projects`, { headers: HEADERS() });
 
     const json = await response.json();
 
@@ -199,16 +201,8 @@ export default class Project extends EventEmitter {
   }
 
   async getProject(projectId) {
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/projects/${projectId}`, {
-      headers
+      headers: HEADERS()
     });
 
     const json = await response.json();
@@ -217,15 +211,7 @@ export default class Project extends EventEmitter {
   }
 
   async getProjectlessScenes() {
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
-    const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/scenes/projectless`, { headers });
+    const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/scenes/projectless`, { headers: HEADERS });
 
     const json = await response.json();
 
@@ -246,7 +232,7 @@ export default class Project extends EventEmitter {
 
     const request = this.fetch(`${RETICULUM_SERVER}/api/v1/media`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: HEADERS(),
       body: JSON.stringify({ media: { url, index } })
     }).then(async response => {
       if (!response.ok) {
@@ -359,12 +345,9 @@ export default class Project extends EventEmitter {
   }
 
   async searchMedia(source, params, cursor, signal) {
-    const url = new URL(`${RETICULUM_SERVER}/api/v1/media/search`);
+    const url = new URL(`${RETICULUM_SERVER}/api/v1/media/search`, { headers: HEADERS({ json: false }) });
 
-    const headers = {
-      "content-type": "application/json",
-      "access-key": getAccessKey()
-    };
+    const headers = HEADERS();
 
     const searchParams = url.searchParams;
 
@@ -372,8 +355,6 @@ export default class Project extends EventEmitter {
 
     if (source === "assets") {
       searchParams.set("user", this.getAccountId());
-      const token = this.getToken();
-      headers.authorization = `Bearer ${token}`;
     }
 
     if (params.type) {
@@ -466,14 +447,6 @@ export default class Project extends EventEmitter {
       throw new Error("Save project aborted");
     }
 
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const project = {
       name: scene.name,
       thumbnail_file_id,
@@ -490,7 +463,7 @@ export default class Project extends EventEmitter {
 
     const projectEndpoint = `${RETICULUM_SERVER}/api/v1/projects`;
 
-    const resp = await this.fetch(projectEndpoint, { method: "POST", headers, body, signal });
+    const resp = await this.fetch(projectEndpoint, { method: "POST", headers: HEADERS(), body, signal });
 
     if (signal.aborted) {
       throw new Error("Save project aborted");
@@ -530,17 +503,9 @@ export default class Project extends EventEmitter {
   }
 
   async deleteProject(projectId) {
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const projectEndpoint = `${RETICULUM_SERVER}/api/v1/projects/${projectId}`;
 
-    const resp = await this.fetch(projectEndpoint, { method: "DELETE", headers });
+    const resp = await this.fetch(projectEndpoint, { method: "DELETE", headers: HEADERS() });
 
     if (resp.status === 401) {
       throw new Error("Not authenticated");
@@ -595,14 +560,6 @@ export default class Project extends EventEmitter {
       throw new Error("Save project aborted");
     }
 
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const project = {
       name: editor.scene.name,
       thumbnail_file_id,
@@ -623,7 +580,7 @@ export default class Project extends EventEmitter {
 
     const projectEndpoint = `${RETICULUM_SERVER}/api/v1/projects/${projectId}`;
 
-    const resp = await this.fetch(projectEndpoint, { method: "PATCH", headers, body, signal });
+    const resp = await this.fetch(projectEndpoint, { method: "PATCH", headers: HEADERS(), body, signal });
 
     const json = await resp.json();
 
@@ -656,13 +613,8 @@ export default class Project extends EventEmitter {
   }
 
   async getScene(sceneId) {
-    const headers = {
-      "content-type": "application/json",
-      "access-key": getAccessKey()
-    };
-
     const response = await this.fetch(`${RETICULUM_SERVER}/api/v1/scenes/${sceneId}`, {
-      headers
+      headers: HEADERS()
     });
 
     const json = await response.json();
@@ -909,18 +861,11 @@ export default class Project extends EventEmitter {
         }
       };
 
-      const token = this.getToken();
-
-      const headers = {
-        "content-type": "application/json",
-        authorization: `Bearer ${token}`,
-        "access-key": getAccessKey()
-      };
       const body = JSON.stringify({ scene: sceneParams });
 
       const resp = await this.fetch(`${RETICULUM_SERVER}/api/v1/projects/${project.project_id}/publish`, {
         method: "POST",
-        headers,
+        headers: HEADERS(),
         body
       });
 
@@ -990,12 +935,6 @@ export default class Project extends EventEmitter {
       glbToken = access_token;
     }
 
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${this.getToken()}`,
-      "access-key": getAccessKey()
-    };
-
     const sceneParams = {
       screenshot_file_id: screenshotId,
       screenshot_file_token: screenshotToken,
@@ -1008,7 +947,7 @@ export default class Project extends EventEmitter {
 
     const resp = await this.fetch(`${RETICULUM_SERVER}/api/v1/scenes${sceneId ? "/" + sceneId : ""}`, {
       method: sceneId ? "PUT" : "POST",
-      headers,
+      headers: HEADERS(),
       body
     });
 
@@ -1021,6 +960,7 @@ export default class Project extends EventEmitter {
 
     return fetch(`${RETICULUM_SERVER}/api/v1/media`, {
       method: "POST",
+      headers: HEADERS({ json: false }),
       body: formData
     }).then(response => response.json());
   }
@@ -1100,14 +1040,6 @@ export default class Project extends EventEmitter {
       await new Promise(resolve => setTimeout(resolve, 1100 - delta));
     }
 
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const body = JSON.stringify({
       asset: {
         name: file.name,
@@ -1118,7 +1050,7 @@ export default class Project extends EventEmitter {
       }
     });
 
-    const resp = await this.fetch(endpoint, { method: "POST", headers, body, signal });
+    const resp = await this.fetch(endpoint, { method: "POST", headers: HEADERS(), body, signal });
 
     const json = await resp.json();
 
@@ -1139,17 +1071,9 @@ export default class Project extends EventEmitter {
   }
 
   async deleteAsset(assetId) {
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const assetEndpoint = `${RETICULUM_SERVER}/api/v1/assets/${assetId}`;
 
-    const resp = await this.fetch(assetEndpoint, { method: "DELETE", headers });
+    const resp = await this.fetch(assetEndpoint, { method: "DELETE", headers: HEADERS() });
 
     if (resp.status === 401) {
       throw new Error("Not authenticated");
@@ -1163,17 +1087,9 @@ export default class Project extends EventEmitter {
   }
 
   async deleteProjectAsset(projectId, assetId) {
-    const token = this.getToken();
-
-    const headers = {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "access-key": getAccessKey()
-    };
-
     const projectAssetEndpoint = `${RETICULUM_SERVER}/api/v1/projects/${projectId}/assets/${assetId}`;
 
-    const resp = await this.fetch(projectAssetEndpoint, { method: "DELETE", headers });
+    const resp = await this.fetch(projectAssetEndpoint, { method: "DELETE", headers: HEADERS() });
 
     if (resp.status === 401) {
       throw new Error("Not authenticated");
