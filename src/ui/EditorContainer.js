@@ -613,7 +613,11 @@ class EditorContainer extends Component {
 
     this.updateModifiedState(() => {
       this.setState({ creatingProject: true, project }, () => {
-        this.props.history.replace(`/projects/${project.project_id}`);
+        const { pathname } = this.props.history.location;
+        const splitPathname = pathname.split("/");
+        splitPathname[splitPathname.length - 1] = project.project_id;
+
+        location.href = splitPathname.join("/");
         this.setState({ creatingProject: false });
       });
     });
