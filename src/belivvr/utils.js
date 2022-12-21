@@ -10,7 +10,11 @@ export function getProjectId() {
  * @throws { TypeError }
  */
 export function getAccessToken() {
-  return JSON.parse(localStorage.getItem("recoil-persist")).accessToken;
+  try {
+    return JSON.parse(localStorage.getItem("recoil-persist")).accessToken;
+  } catch {
+    return "";
+  }
 }
 
 /**
