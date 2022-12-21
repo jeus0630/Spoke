@@ -30,10 +30,10 @@ jobs:
       - name: Build
         run: yarn build
         env:
-          HUBS_SERVER: https://dev.xrcloud.belivvr.com/spoke/api/proxy
-          RETICULUM_SERVER: https://dev.xrcloud.belivvr.com/spoke/api/proxy
+          HUBS_SERVER: https://hubs-api.dev.xrcloud.belivvr.com
+          RETICULUM_SERVER: https://hubs-api.dev.xrcloud.belivvr.com
           THUMBNAIL_SERVER: https://nearspark.hubs-alpha.belivvr.com
-          CORS_PROXY_SERVER: https://dev.xrcloud.belivvr.com/spoke/api/cors
+          CORS_PROXY_SERVER: https://hubs-api.dev.xrcloud.belivvr.com/api/v1/cors
           NON_CORS_PROXY_DOMAINS: hubs-alpha.belivvr.com.com,dev.xrcloud.belivvr.com,assets.dev.xrcloud.belivvr.com
           BASE_ASSETS_PATH: https://assets.dev.xrcloud.belivvr.com/spoke/
           ROUTER_BASE_PATH: /spoke
