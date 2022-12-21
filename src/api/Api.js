@@ -452,7 +452,8 @@ export default class Project extends EventEmitter {
       thumbnail_file_id,
       thumbnail_file_token,
       project_file_id,
-      project_file_token
+      project_file_token,
+      custom_data: window.XRCLOUD?.customData
     };
 
     if (parentSceneId) {
@@ -565,7 +566,8 @@ export default class Project extends EventEmitter {
       thumbnail_file_id,
       thumbnail_file_token,
       project_file_id,
-      project_file_token
+      project_file_token,
+      custom_data: window.XRCLOUD?.customData
     };
 
     const sceneId = editor.scene.metadata && editor.scene.metadata.sceneId ? editor.scene.metadata.sceneId : null;
