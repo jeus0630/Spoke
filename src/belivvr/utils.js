@@ -11,7 +11,7 @@ export function getProjectId() {
  */
 export function getAccessToken() {
   try {
-    return JSON.parse(localStorage.getItem("recoil-persist")).accessToken;
+    return window.XRCLOUD?.accessToken || JSON.parse(localStorage.getItem("recoil-persist")).accessToken;
   } catch {
     return "";
   }

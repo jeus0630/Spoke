@@ -13,7 +13,7 @@ import PublishedSceneDialog from "./PublishedSceneDialog";
 import { matchesFileTypes, AudioFileTypes } from "../ui/assets/fileTypes";
 import { RethrownError } from "../editor/utils/errors";
 
-import { blobToBase64, getAccessToken, getAccessKey } from "../belivvr/utils";
+import { blobToBase64, getAccessToken } from "../belivvr/utils";
 
 // Media related functions should be kept up to date with Hubs media-utils:
 // https://github.com/mozilla/hubs/blob/master/src/utils/media-utils.js
@@ -24,7 +24,6 @@ const resolveMediaCache = new Map();
 const RETICULUM_SERVER = configs.RETICULUM_SERVER || document.location.hostname;
 const HEADERS = ({ json } = { json: true }) => {
   const headers = {
-    "access-key": getAccessKey(),
     authorization: `Bearer ${getAccessToken()}`
   };
 
