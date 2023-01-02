@@ -33,7 +33,7 @@ jobs:
           HUBS_SERVER: https://hubs-api.stage.xrcloud.belivvr.com
           RETICULUM_SERVER: https://hubs-api.stage.xrcloud.belivvr.com
           THUMBNAIL_SERVER: https://nearspark.hubs-alpha.belivvr.com
-          CORS_PROXY_SERVER: https://cors.stage.xrcloud.belivvr.com
+          CORS_PROXY_SERVER: https://cors.dev.xrcloud.belivvr.com
           NON_CORS_PROXY_DOMAINS: hubs-alpha.belivvr.com.com,stage.xrcloud.belivvr.com,assets.stage.xrcloud.belivvr.com
           BASE_ASSETS_PATH: https://assets.stage.xrcloud.belivvr.com/spoke/
           ROUTER_BASE_PATH: /spoke
