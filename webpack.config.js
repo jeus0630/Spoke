@@ -206,6 +206,7 @@ module.exports = env => {
         BUILD_VERSION: "dev",
         NODE_ENV: "development",
         RETICULUM_SERVER: undefined,
+        MEDIA_SERVER: undefined,
         THUMBNAIL_SERVER: "",
         HUBS_SERVER: undefined,
         CORS_PROXY_SERVER: null,

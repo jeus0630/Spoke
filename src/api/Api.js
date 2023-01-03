@@ -22,6 +22,7 @@ const resolveUrlCache = new Map();
 const resolveMediaCache = new Map();
 
 const RETICULUM_SERVER = configs.RETICULUM_SERVER || document.location.hostname;
+const MEDIA_SERVER = configs.MEDIA_SERVER;
 const HEADERS = ({ json } = { json: true }) => {
   const headers = {
     authorization: `Bearer ${getAccessToken()}`
@@ -229,7 +230,7 @@ export default class Project extends EventEmitter {
     const cacheKey = `${url}|${index}`;
     if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
 
-    const request = this.fetch(`${RETICULUM_SERVER}/api/v1/media`, {
+    const request = this.fetch(`${MEDIA_SERVER}/api/v1/media`, {
       method: "POST",
       headers: HEADERS(),
       body: JSON.stringify({ media: { url, index } })
@@ -344,9 +345,11 @@ export default class Project extends EventEmitter {
   }
 
   async searchMedia(source, params, cursor, signal) {
-    const url = new URL(`${RETICULUM_SERVER}/api/v1/media/search`, { headers: HEADERS({ json: false }) });
+    const url = new URL(`${MEDIA_SERVER}/api/v1/media/search`);
 
-    const headers = HEADERS();
+    const headers = {
+      "content-type": "application/json"
+    };
 
     const searchParams = url.searchParams;
 
@@ -959,7 +962,7 @@ export default class Project extends EventEmitter {
     const formData = new FormData();
     formData.set("media", await blobToBase64(blob));
 
-    return fetch(`${RETICULUM_SERVER}/api/v1/media`, {
+    return fetch(`${MEDIA_SERVER}/api/v1/media`, {
       method: "POST",
       headers: HEADERS({ json: false }),
       body: formData
