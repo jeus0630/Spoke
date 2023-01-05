@@ -962,7 +962,7 @@ export default class Project extends EventEmitter {
     const formData = new FormData();
     formData.set("media", await blobToBase64(blob));
 
-    return fetch(`${MEDIA_SERVER}/api/v1/media`, {
+    return fetch(`${RETICULUM_SERVER}/api/v1/media`, {
       method: "POST",
       headers: HEADERS({ json: false }),
       body: formData
