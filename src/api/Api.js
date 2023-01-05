@@ -230,9 +230,11 @@ export default class Project extends EventEmitter {
     const cacheKey = `${url}|${index}`;
     if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
 
-    const request = this.fetch(`${MEDIA_SERVER}/api/v1/media`, {
+    const isSketchfab = url.includes("https://sketchfab.com/");
+
+    const request = this.fetch(`${isSketchfab ? MEDIA_SERVER : RETICULUM_SERVER}/api/v1/media`, {
       method: "POST",
-      headers: HEADERS(),
+      headers: isSketchfab ? { "Content-Type": "application/json" } : HEADERS(),
       body: JSON.stringify({ media: { url, index } })
     }).then(async response => {
       if (!response.ok) {
