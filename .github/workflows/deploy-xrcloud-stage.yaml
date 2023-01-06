@@ -31,7 +31,7 @@ jobs:
         run: yarn build
         env:
           HUBS_SERVER: https://hubs-api.stage.xrcloud.belivvr.com
-          RETICULUM_SERVER: https://hubs-api.stage.xrcloud.belivvr.com
+          RETICULUM_SERVER: https://spoke-api.stage.xrcloud.belivvr.com
           THUMBNAIL_SERVER: https://nearspark.xrcloud.belivvr.com
           CORS_PROXY_SERVER: https://cors.dev.xrcloud.belivvr.com
           MEDIA_SERVER: https://reticulum.stage.xrcloud.belivvr.com
