@@ -3,7 +3,7 @@ name: Deploy S3 XRCloud Test
 on:
   push:
     branches:
-      - xrcloud-test
+      - xrcloud-test 
 
 jobs:
   deploy-s3-dev:
